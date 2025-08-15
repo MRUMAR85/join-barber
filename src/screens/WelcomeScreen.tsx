@@ -49,7 +49,7 @@ export default function WelcomeScreen() {
         if (mode === 'signin') {
             await signIn(email.trim(), password);
         } else {
-            await signUp({
+            const result = await signUp({
                 first_name: firstName.trim(),
                 last_name: lastName.trim(),
                 email: email.trim(),
@@ -58,6 +58,19 @@ export default function WelcomeScreen() {
                 password_confirmation: passwordConfirmation,
                 role: type,
             });
+            
+            // If registration is successful, switch to login mode and pre-fill email
+            if (result.success) {
+                setMode('signin');
+                // Clear all form fields except email
+                setFirstName('');
+                setLastName('');
+                setPhone('');
+                setPassword('');
+                setPasswordConfirmation('');
+                setType('Barber');
+                setErrors({});
+            }
         }
     };
 
@@ -77,6 +90,22 @@ export default function WelcomeScreen() {
                                 <Text style={[styles.tabText, mode === 'signup' && styles.tabTextActive]}>Sign Up</Text>
                             </Pressable>
                         </View>
+                        
+                        {mode === 'signin' && (
+                            <View style={styles.infoBox}>
+                                <Text style={styles.infoText}>
+                                    💡 Don't have an account? Switch to Sign Up to create one.
+                                </Text>
+                            </View>
+                        )}
+                        
+                        {mode === 'signup' && (
+                            <View style={styles.infoBox}>
+                                <Text style={styles.infoText}>
+                                    💡 Already have an account? Switch to Sign In to continue.
+                                </Text>
+                            </View>
+                        )}
 
                         {mode === 'signup' && (
                             <>
@@ -218,6 +247,19 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+    infoBox: {
+        backgroundColor: '#F0F9FF',
+        borderWidth: 1,
+        borderColor: '#0EA5E9',
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 16,
+    },
+    infoText: {
+        color: '#0369A1',
+        fontSize: 14,
+        textAlign: 'center',
+    },
 });
 
 

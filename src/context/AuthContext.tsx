@@ -8,7 +8,7 @@ type AuthContextType = {
 	user: User | null;
 	loading: boolean;
 	signIn: (email: string, password: string) => Promise<void>;
-	signUp: (payload: { first_name: string; last_name: string; email: string; phone: string; password: string; password_confirmation: string; role: User['role'] }) => Promise<void>;
+	signUp: (payload: { first_name: string; last_name: string; email: string; phone: string; password: string; password_confirmation: string; role: User['role'] }) => Promise<{ success: boolean; message?: string; error?: string }>;
 	signOut: () => Promise<void>;
 };
 
@@ -32,9 +32,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 		setLoading(false);
 		if (res.ok) {
 			setUser(res.user);
-			Alert.alert('Login successful');
+			Alert.alert(
+				'Welcome Back!', 
+				`Successfully logged in as ${res.user.first_name} ${res.user.last_name}`,
+				[{ text: 'Continue', onPress: () => {} }]
+			);
 		} else {
-			Alert.alert('Error', typeof res.error === 'string' ? res.error : 'Invalid email or password');
+			Alert.alert('Login Failed', typeof res.error === 'string' ? res.error : 'Invalid email or password');
 		}
 	};
 
@@ -43,8 +47,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 		const res = await authService.signUp(payload);
 		setLoading(false);
 		if (res.ok) {
-			setUser(res.user);
-			Alert.alert('Account created successfully');
+			// Don't set user, just show success message and clear form
+			Alert.alert(
+				'Account Created Successfully!', 
+				'Please sign in with your email and password to continue.',
+				[
+					{
+						text: 'OK',
+						onPress: () => {
+							// This will trigger the form to switch to login mode
+							// We'll handle this in the WelcomeScreen
+						}
+					}
+				]
+			);
+			return { success: true, message: 'Account created successfully' };
 		} else {
 			const errorText = typeof res.error === 'string'
 				? res.error
@@ -52,6 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 						.map(([k, v]) => `${k}: ${v.join(', ')}`)
 						.join('\n');
 			Alert.alert('Validation failed', errorText);
+			return { success: false, error: errorText };
 		}
 	};
 
