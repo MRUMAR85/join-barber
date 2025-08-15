@@ -164,13 +164,13 @@ eas build --platform android
 #### Vercel (Recommended)
 1. Connect your GitHub repository to Vercel
 2. Set build command: `npm run build`
-3. Set output directory: `web-build`
+3. Set output directory: `dist`
 4. Deploy automatically on push
 
 #### Netlify
 1. Connect your GitHub repository
 2. Set build command: `npm run build`
-3. Set publish directory: `web-build`
+3. Set publish directory: `dist`
 
 ## 🔧 Development
 

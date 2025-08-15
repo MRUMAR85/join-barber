@@ -1,6 +1,18 @@
-export const validateFullName = (v: string) => {
-	if (!v?.trim()) return 'Full name is required';
-	if (v.trim().length < 2) return 'Full name must be at least 2 characters';
+export const validateFirstName = (v: string) => {
+	if (!v?.trim()) return 'First name is required';
+	if (v.trim().length < 2) return 'First name must be at least 2 characters';
+	return '';
+};
+
+export const validateLastName = (v: string) => {
+	if (!v?.trim()) return 'Last name is required';
+	if (v.trim().length < 2) return 'Last name must be at least 2 characters';
+	return '';
+};
+
+export const validatePhone = (v: string) => {
+	if (!v?.trim()) return 'Phone number is required';
+	if (v.trim().length < 10) return 'Phone number must be at least 10 digits';
 	return '';
 };
 

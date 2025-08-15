@@ -4,17 +4,20 @@ import TextInputField from '../components/TextInputField';
 import AccountTypeCard from '../components/AccountTypeCard';
 import PasswordInput from '../components/PasswordInput';
 import { useAuth } from '../context/AuthContext';
-import { validateEmail, validateFullName, validatePassword } from '../utils/validation';
+import { validateEmail, validateFirstName, validateLastName, validatePhone, validatePassword } from '../utils/validation';
 
 type Mode = 'signin' | 'signup';
-type AccountType = 'customer' | 'barber_shop_owner' | 'barber';
+type AccountType = 'Customer' | 'Shop' | 'Barber';
 
 export default function WelcomeScreen() {
     const [mode, setMode] = useState<Mode>('signup');
-    const [fullName, setFullName] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
-    const [type, setType] = useState<AccountType>('barber');
+    const [passwordConfirmation, setPasswordConfirmation] = useState('');
+    const [type, setType] = useState<AccountType>('Barber');
     const [errors, setErrors] = useState<Record<string, string>>({});
     const { signIn, signUp, loading } = useAuth();
 
@@ -23,13 +26,20 @@ export default function WelcomeScreen() {
     const validate = () => {
         const next: Record<string, string> = {};
         if (mode === 'signup') {
-            const e1 = validateFullName(fullName);
-            if (e1) next.full_name = e1;
+            const e1 = validateFirstName(firstName);
+            if (e1) next.first_name = e1;
+            const e2 = validateLastName(lastName);
+            if (e2) next.last_name = e2;
+            const e3 = validatePhone(phone);
+            if (e3) next.phone = e3;
         }
-        const e2 = validateEmail(email);
-        if (e2) next.email = e2;
-        const e3 = validatePassword(password);
-        if (e3) next.password = e3;
+        const e4 = validateEmail(email);
+        if (e4) next.email = e4;
+        const e5 = validatePassword(password);
+        if (e5) next.password = e5;
+        if (mode === 'signup' && password !== passwordConfirmation) {
+            next.password_confirmation = 'Passwords do not match';
+        }
         setErrors(next);
         return Object.keys(next).length === 0;
     };
@@ -40,10 +50,13 @@ export default function WelcomeScreen() {
             await signIn(email.trim(), password);
         } else {
             await signUp({
-                full_name: fullName.trim(),
+                first_name: firstName.trim(),
+                last_name: lastName.trim(),
                 email: email.trim(),
+                phone: phone.trim(),
                 password,
-                account_type: type,
+                password_confirmation: passwordConfirmation,
+                role: type,
             });
         }
     };
@@ -66,17 +79,41 @@ export default function WelcomeScreen() {
                         </View>
 
                         {mode === 'signup' && (
-                            <TextInputField
-                                label="Full Name"
-                                value={fullName}
-                                onChangeText={(t) => {
-                                    setFullName(t);
-                                    if (errors.full_name) setErrors((e) => ({ ...e, full_name: '' }));
-                                }}
-                                placeholder="John Doe"
-                                autoCapitalize="words"
-                                error={errors.full_name}
-                            />
+                            <>
+                                <TextInputField
+                                    label="First Name"
+                                    value={firstName}
+                                    onChangeText={(t) => {
+                                        setFirstName(t);
+                                        if (errors.first_name) setErrors((e) => ({ ...e, first_name: '' }));
+                                    }}
+                                    placeholder="John"
+                                    autoCapitalize="words"
+                                    error={errors.first_name}
+                                />
+                                <TextInputField
+                                    label="Last Name"
+                                    value={lastName}
+                                    onChangeText={(t) => {
+                                        setLastName(t);
+                                        if (errors.last_name) setErrors((e) => ({ ...e, last_name: '' }));
+                                    }}
+                                    placeholder="Doe"
+                                    autoCapitalize="words"
+                                    error={errors.last_name}
+                                />
+                                <TextInputField
+                                    label="Phone Number"
+                                    value={phone}
+                                    onChangeText={(t) => {
+                                        setPhone(t);
+                                        if (errors.phone) setErrors((e) => ({ ...e, phone: '' }));
+                                    }}
+                                    placeholder="03347882314"
+                                    keyboardType="phone-pad"
+                                    error={errors.phone}
+                                />
+                            </>
                         )}
 
                         <TextInputField
@@ -103,6 +140,19 @@ export default function WelcomeScreen() {
                             autoCapitalize="none"
                             error={errors.password}
                         />
+                        {mode === 'signup' && (
+                            <PasswordInput
+                                label="Confirm Password"
+                                value={passwordConfirmation}
+                                onChangeText={(t: string) => {
+                                    setPasswordConfirmation(t);
+                                    if (errors.password_confirmation) setErrors((e) => ({ ...e, password_confirmation: '' }));
+                                }}
+                                placeholder="Confirm your password"
+                                autoCapitalize="none"
+                                error={errors.password_confirmation}
+                            />
+                        )}
 
                         {mode === 'signup' && (
                             <View style={{ marginTop: 8 }}>
@@ -111,22 +161,22 @@ export default function WelcomeScreen() {
                                     title="Customer"
                                     subtitle="Join queues at barbershops"
                                     icon="person-outline"
-                                    selected={type === 'customer'}
-                                    onPress={() => setType('customer')}
+                                    selected={type === 'Customer'}
+                                    onPress={() => setType('Customer')}
                                 />
                                 <AccountTypeCard
-                                    title="Barber Shop Owner"
+                                    title="Shop Owner"
                                     subtitle="Manage your barbershop and queues"
                                     icon="storefront-outline"
-                                    selected={type === 'barber_shop_owner'}
-                                    onPress={() => setType('barber_shop_owner')}
+                                    selected={type === 'Shop'}
+                                    onPress={() => setType('Shop')}
                                 />
                                 <AccountTypeCard
                                     title="Barber"
                                     subtitle="Work at a barbershop and serve customers"
                                     icon="cut-outline"
-                                    selected={type === 'barber'}
-                                    onPress={() => setType('barber')}
+                                    selected={type === 'Barber'}
+                                    onPress={() => setType('Barber')}
                                 />
                             </View>
                         )}

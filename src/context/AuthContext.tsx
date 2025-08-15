@@ -2,13 +2,13 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from '
 import { Alert } from 'react-native';
 import { authService } from '../services/authService';
 
-type User = { id: number; full_name: string; email: string; account_type: 'customer' | 'barber_shop_owner' | 'barber' };
+type User = { id: number; first_name: string; last_name: string; email: string; role: 'Customer' | 'Shop' | 'Barber' };
 
 type AuthContextType = {
 	user: User | null;
 	loading: boolean;
 	signIn: (email: string, password: string) => Promise<void>;
-	signUp: (payload: { full_name: string; email: string; password: string; account_type: User['account_type'] }) => Promise<void>;
+	signUp: (payload: { first_name: string; last_name: string; email: string; phone: string; password: string; password_confirmation: string; role: User['role'] }) => Promise<void>;
 	signOut: () => Promise<void>;
 };
 
@@ -38,7 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 		}
 	};
 
-	const signUp = async (payload: { full_name: string; email: string; password: string; account_type: User['account_type'] }) => {
+	const signUp = async (payload: { first_name: string; last_name: string; email: string; phone: string; password: string; password_confirmation: string; role: User['role'] }) => {
 		setLoading(true);
 		const res = await authService.signUp(payload);
 		setLoading(false);

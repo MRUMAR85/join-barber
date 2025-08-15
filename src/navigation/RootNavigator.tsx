@@ -20,10 +20,10 @@ const BarberDashboard = () => <ScreenCenter />;
 const RoleRouter = () => {
 	const { user } = useAuth();
 	if (!user) return null;
-	switch (user.account_type) {
-		case 'customer':
+	switch (user.role) {
+		case 'Customer':
 			return <Stack.Screen name="CustomerDashboard" component={CustomerDashboard} options={{ title: 'Dashboard' }} />;
-		case 'barber_shop_owner':
+		case 'Shop':
 			return <Stack.Screen name="OwnerDashboard" component={OwnerDashboard} options={{ title: 'Shop Management' }} />;
 		default:
 			return <Stack.Screen name="BarberDashboard" component={BarberDashboard} options={{ title: 'Barber' }} />;

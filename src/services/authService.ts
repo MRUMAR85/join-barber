@@ -4,10 +4,13 @@ import { BASE_URL } from '../constants/config';
 type AccountType = 'customer' | 'barber_shop_owner' | 'barber';
 
 type SignUpRequest = {
-	full_name: string;
+	first_name: string;
+	last_name: string;
 	email: string;
+	phone: string;
 	password: string;
-	account_type: AccountType;
+	password_confirmation: string;
+	role: 'Customer' | 'Shop' | 'Barber';
 };
 
 type ApiSuccess<T> = { success: true; data: T; message?: string };
@@ -25,7 +28,7 @@ const parse = async <T>(res: Response): Promise<ApiSuccess<T> | ApiError> => {
 export const authService = {
 	signUp: async (payload: SignUpRequest) => {
 		try {
-			const res = await fetch(`${BASE_URL}/api/auth/register`, {
+			const res = await fetch(`${BASE_URL}/auth/register`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(payload),
@@ -46,7 +49,7 @@ export const authService = {
 	},
 	signIn: async (payload: { email: string; password: string }) => {
 		try {
-			const res = await fetch(`${BASE_URL}/api/auth/login`, {
+			const res = await fetch(`${BASE_URL}/auth/login`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(payload),
@@ -66,7 +69,23 @@ export const authService = {
 		}
 	},
 	signOut: async () => {
-		await AsyncStorage.multiRemove(['userToken', 'userData']);
+		try {
+			// Call logout endpoint if token exists
+			const token = await AsyncStorage.getItem('userToken');
+			if (token) {
+				await fetch(`${BASE_URL}/auth/logout`, {
+					method: 'POST',
+					headers: { 
+						'Content-Type': 'application/json',
+						'Authorization': `Bearer ${token}`
+					},
+				});
+			}
+		} catch (error) {
+			console.log('Logout error:', error);
+		} finally {
+			await AsyncStorage.multiRemove(['userToken', 'userData']);
+		}
 	},
 	restore: async () => {
 		const [[, token], [, user]] = await AsyncStorage.multiGet(['userToken', 'userData']);
