@@ -32,13 +32,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 		setLoading(false);
 		if (res.ok) {
 			setUser(res.user);
-			Alert.alert(
-				'Welcome Back!', 
-				`Successfully logged in as ${res.user.first_name} ${res.user.last_name}`,
-				[{ text: 'Continue', onPress: () => {} }]
-			);
+			// For web, we'll use a simple alert, for mobile we can use Alert.alert
+			if (typeof window !== 'undefined') {
+				// Web environment
+				alert(`Welcome Back! Successfully logged in as ${res.user.first_name} ${res.user.last_name}`);
+			} else {
+				// Mobile environment
+				Alert.alert(
+					'Welcome Back!', 
+					`Successfully logged in as ${res.user.first_name} ${res.user.last_name}`,
+					[{ text: 'Continue', onPress: () => {} }]
+				);
+			}
 		} else {
-			Alert.alert('Login Failed', typeof res.error === 'string' ? res.error : 'Invalid email or password');
+			const errorMessage = typeof res.error === 'string' ? res.error : 'Invalid email or password';
+			if (typeof window !== 'undefined') {
+				alert(`Login Failed: ${errorMessage}`);
+			} else {
+				Alert.alert('Login Failed', errorMessage);
+			}
 		}
 	};
 
@@ -48,19 +60,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 		setLoading(false);
 		if (res.ok) {
 			// Don't set user, just show success message and clear form
-			Alert.alert(
-				'Account Created Successfully!', 
-				'Please sign in with your email and password to continue.',
-				[
-					{
-						text: 'OK',
-						onPress: () => {
-							// This will trigger the form to switch to login mode
-							// We'll handle this in the WelcomeScreen
+			if (typeof window !== 'undefined') {
+				// Web environment
+				alert('Account Created Successfully! Please sign in with your email and password to continue.');
+			} else {
+				// Mobile environment
+				Alert.alert(
+					'Account Created Successfully!', 
+					'Please sign in with your email and password to continue.',
+					[
+						{
+							text: 'OK',
+							onPress: () => {
+								// This will trigger the form to switch to login mode
+								// We'll handle this in the WelcomeScreen
+							}
 						}
-					}
-				]
-			);
+					]
+				);
+			}
 			return { success: true, message: 'Account created successfully' };
 		} else {
 			const errorText = typeof res.error === 'string'
@@ -68,7 +86,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 				: Object.entries(res.error as Record<string, string[]>)
 						.map(([k, v]) => `${k}: ${v.join(', ')}`)
 						.join('\n');
-			Alert.alert('Validation failed', errorText);
+			if (typeof window !== 'undefined') {
+				alert(`Validation failed: ${errorText}`);
+			} else {
+				Alert.alert('Validation failed', errorText);
+			}
 			return { success: false, error: errorText };
 		}
 	};

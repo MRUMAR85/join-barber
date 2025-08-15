@@ -49,22 +49,28 @@ export const authService = {
 	},
 	signIn: async (payload: { email: string; password: string }) => {
 		try {
+			console.log('Attempting sign in with:', { email: payload.email, url: `${BASE_URL}/auth/login` });
 			const res = await fetch(`${BASE_URL}/auth/login`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(payload),
 			});
+			console.log('Sign in response status:', res.status);
 			const result = await parse<{ user: any; token: string }>(res);
+			console.log('Sign in result:', result);
 			if ((result as ApiSuccess<any>).success) {
 				const { token, user } = (result as ApiSuccess<any>).data;
 				await AsyncStorage.multiSet([
 					['userToken', token],
 					['userData', JSON.stringify(user)],
 				]);
+				console.log('User data stored, returning success');
 				return { ok: true, user };
 			}
+			console.log('Sign in failed:', (result as ApiError).message);
 			return { ok: false, error: (result as ApiError).message || 'Invalid credentials' };
-		} catch {
+		} catch (error) {
+			console.log('Sign in error:', error);
 			return { ok: false, error: 'Connection failed' };
 		}
 	},
